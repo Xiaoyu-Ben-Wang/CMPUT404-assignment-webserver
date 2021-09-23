@@ -60,9 +60,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handleFileRequest(self, request_dest, request_dir):
         MIMETYPE = {
-            '.jpeg': 'image/jpeg',
-            '.jpg': 'image/jpg',
-            '.png': 'image/png',
             '.txt': 'text/plain',
             '.html': 'text/html',
             '.css': 'text/css'
