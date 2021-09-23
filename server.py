@@ -69,6 +69,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         }
         FILEPATH = os.path.normpath(self.base+request_dir)
 
+        if os.path.commonpath([self.base]) != os.path.commonpath([self.base, FILEPATH]):
+            request_dest.sendall((self.getResponseHeader(404)+"\r\n").encode("utf-8"))
+            return
+
+
         # Handle Files
         if os.path.isfile(FILEPATH):
             fname, ftype = os.path.splitext(FILEPATH)
@@ -107,7 +112,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             # sanitize input
             self.data = [line.strip() for line in self.request.recv(1024).decode().strip().split('\n')]
             http_data = self.data[0]
-            print("Got a request of: %s" % http_data)
+            print("Got a request of: %s" % http_data.strip(), end='\n\n')
 
             request_type, request_dir = http_data.split()[:2]
 
@@ -126,6 +131,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         except Exception as e:
             print(f"Error: {e}")
+
         return
 
 
