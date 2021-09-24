@@ -1,6 +1,7 @@
 #  coding: utf-8
 import socketserver
 import os
+from datetime import date, datetime
 
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
@@ -56,7 +57,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             404: "Not Found",
             405: "Method Not Allowed",
         }
-        return f"HTTP/1.1 {http_code} {status_map.get(http_code, 'N/A')}\r\n"
+        return f"HTTP/1.1 {http_code} {status_map.get(http_code, 'N/A')}\r\nDate: {datetime.now()} MST\r\n"
 
     def handleFileRequest(self, request_dest, request_dir):
         MIMETYPE = {
@@ -67,7 +68,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         FILEPATH = os.path.normpath(self.base+request_dir)
 
         if os.path.commonpath([self.base]) != os.path.commonpath([self.base, FILEPATH]):
-            request_dest.sendall((self.getResponseHeader(404)+"\r\n").encode("utf-8"))
+            request_dest.sendall((self.getResponseHeader(404)+"Connection: close\r\n\r\n").encode("utf-8"))
             return
 
 
@@ -76,8 +77,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
             fname, ftype = os.path.splitext(FILEPATH)
             response = self.getResponseHeader(200)
             with open(FILEPATH) as f:
-                response += f"Content-Type:{MIMETYPE[ftype]};charset=UTF-8\r\n\r\n"
-                response += f.read()
+                content = f.read()
+                response += f"Content-Length: {len(content)}\r\nConnection: close\r\nContent-Type:{MIMETYPE[ftype]};charset=UTF-8\r\n\r\n"
+                response += content
             request_dest.sendall(response.encode("utf-8"))
             return
         # Handle Directories
@@ -85,7 +87,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             # 301 redirection for directory name
             if request_dir[-1] != '/':
                 request_dir+='/'
-                request_dest.sendall((self.getResponseHeader(301) + f"Location: {request_dir}").encode("utf-8"))
+                request_dest.sendall((self.getResponseHeader(301) + f"Location: {request_dir}\r\n"+"Connection: close\r\n\r\n").encode("utf-8"))
                 return
 
 
@@ -93,15 +95,16 @@ class MyWebServer(socketserver.BaseRequestHandler):
             response = self.getResponseHeader(200)
             if os.path.isfile(FILEPATH):
                 with open(FILEPATH) as f:
-                    response += f"Content-Type:text/html;charset=UTF-8\r\n\r\n"
-                    response += f.read()
+                    content = f.read()
+                    response += f"Content-Length: {len(content)}\r\nConnection: close\r\nContent-Type:text/html;charset=UTF-8\r\n\r\n"
+                    response += content
                 request_dest.sendall(response.encode("utf-8"))
                 return
             else:
                 request_dest.sendall((response + "\r\n").encode("utf-8"))
                 return
         else:
-            request_dest.sendall((self.getResponseHeader(404)+"\r\n").encode("utf-8"))
+            request_dest.sendall((self.getResponseHeader(404)+"Connection: close\r\n\r\n").encode("utf-8"))
             return
 
     def handle(self):
@@ -119,7 +122,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
             # POST, PUT, DELETE requests
             else:
-                self.request.sendall(bytearray(self.getResponseHeader(405)+"\r\n", 'utf-8'))
+                self.request.sendall(bytearray(self.getResponseHeader(405)+"Connection: close\r\n\r\n", 'utf-8'))
                 return
 
             # response = self.getResponseHeader(200, "text/html")+"<html><p>hello world</p></html>\r\n\r\n"
