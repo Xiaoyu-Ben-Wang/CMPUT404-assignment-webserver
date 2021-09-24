@@ -109,9 +109,14 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         try:
+
+            raw_ = ""
+            while "\r\n\r\n" not in raw_:
+                raw_ += self.request.recv(1024).decode()
+
             # sanitize input
-            self.data = [line.strip() for line in self.request.recv(1024).decode().strip().split('\n')]
-            http_data = self.data[0]
+            data = [line.strip() for line in raw_.strip().split('\n')]
+            http_data = data[0]
             print("Got a request of: %s" % http_data.strip(), end='\n\n')
 
             request_type, request_dir = http_data.split()[:2]
