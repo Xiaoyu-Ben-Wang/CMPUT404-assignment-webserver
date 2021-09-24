@@ -111,12 +111,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         try:
             counter = 0
             raw_data = ""
-            while "\r\n\r\n" not in raw_data:
+            while "\r\n\r\n" not in raw_data and "\n\n" not in raw_data:
                 raw_data += self.request.recv(1024).decode()
                 counter += 1
                 if counter > 100:
-                    print("Error reading request")
-                    raise Exception
+                    break
 
             # sanitize input
             data = [line.strip() for line in raw_data.strip().split('\n')]
