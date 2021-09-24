@@ -7,6 +7,13 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a simple webserver.
 
+Statement of Collaboration
+==========================
+With respect to the Collaboration Policy described in the Department of Computing Science Course Polices:
+This assignment was completed by Xiaoyu Wang with consultation from:
+- Danila Seliayeu (seliayeu)
+
+
 Contributors / Licensing
 ========================
 
