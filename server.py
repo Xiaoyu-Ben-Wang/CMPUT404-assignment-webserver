@@ -1,7 +1,8 @@
 #  coding: utf-8
 import socketserver
 import os
-from datetime import date, datetime
+from datetime import datetime
+import time
 
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
@@ -57,7 +58,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             404: "Not Found",
             405: "Method Not Allowed",
         }
-        return f"HTTP/1.1 {http_code} {status_map.get(http_code, 'N/A')}\r\nDate: {datetime.now()} MST\r\n"
+        http_time = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime())
+        return f"HTTP/1.1 {http_code} {status_map.get(http_code, 'N/A')}\r\nDate: {http_time} MST\r\n"
 
     def handleFileRequest(self, request_dest, request_dir):
         MIMETYPE = {
