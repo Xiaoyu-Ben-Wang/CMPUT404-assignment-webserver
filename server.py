@@ -109,13 +109,17 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         try:
-
-            raw_ = ""
-            while "\r\n\r\n" not in raw_:
-                raw_ += self.request.recv(1024).decode()
+            counter = 0
+            raw_data = ""
+            while "\r\n\r\n" not in raw_data:
+                raw_data += self.request.recv(1024).decode()
+                counter += 1
+                if counter > 100:
+                    print("Error reading request")
+                    raise Exception
 
             # sanitize input
-            data = [line.strip() for line in raw_.strip().split('\n')]
+            data = [line.strip() for line in raw_data.strip().split('\n')]
             http_data = data[0]
             print("Got a request of: %s" % http_data.strip(), end='\n\n')
 
